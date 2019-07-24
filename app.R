@@ -4,6 +4,7 @@ library(flipcard)
 ui <- fluidPage(
   titlePanel("reactR Input Example"),
   wellPanel(style = "width:400px;", "Quick Example demonstrating flipping in Shiny."),
+  actionButton("btnflip", "Flip card"),
   flipcardInput(
     "flipInput",
     configuration = list(
@@ -29,17 +30,22 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
-  isFlipped <- FALSE
-  observe({
-    invalidateLater(1000)
-    isFlipped <<- !isFlipped
+
+  # reactive value for flipped state
+  isFlipped <- reactiveVal(FALSE)
+
+  observeEvent(input$btnflip, {
+    # toggle flipped
+    isFlipped(!isFlipped())
+
+    # send update to flipcard
     flipcard::updateFlipcardInput(
       session = session,
       inputId = "flipInput",
       value = NULL,
       configuration = list(
         containerStyle = list(width = "400px", height = "400px"),
-        isFlipped = isFlipped,
+        isFlipped = isFlipped(),
         front = list(
           tag = "img",
           props = list(
